@@ -1,0 +1,6 @@
+*.txt
+*.exe
+*.out
+.vscode/
+*.json
+*.txt.bak
