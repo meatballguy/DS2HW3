@@ -44,4 +44,3 @@ input<N>.txt / input<N>.bin    # Input data files (not committed)
 ## Recent Commits
 
 <!-- COMMITS_START -->
-| SHA | Message | Date |\n|---|---|---|\n| [`44fabc6`](../../commit/44fabc6fba12bfdfd5605f33f2b67daeabad6b28) | Merge pull request #1 from meatballguy/copilot/modify-readme-new-commit | 2026-05-03 |\n| [`1f47601`](../../commit/1f47601fd6cf56bda528ad3b57f8db1c45d095dd) | Add README.md and GitHub Actions workflow to auto-update commits section | 2026-05-03 |\n| [`368235f`](../../commit/368235f6b28695f641f98bfb0ad18fcc59b6fcfd) | 完成 HashTable 模板與 IO 邏輯更新 | 2026-05-02 |\n
