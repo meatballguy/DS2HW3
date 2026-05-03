@@ -77,7 +77,7 @@ class IO {
         // return false if bin don't exsist, then create bin file
         ifstream bin; // binary input
         string binName = "input" + fileNum + ".bin";
-        bin.open(binName);
+        bin.open(binName.c_str());
         if (bin.is_open()) {
             // load data to data
             return true;
@@ -90,7 +90,7 @@ class IO {
     bool static TxtToBin(string fileNum, vector<StudentData> data) {
         ifstream tin; // text input
         string tinName = "input" + fileNum + ".txt";
-        tin.open(tinName);
+        tin.open(tinName.c_str());
         if (tin.is_open()) {
             // load data to data
             return true;
@@ -100,7 +100,6 @@ class IO {
         }
     }
 };
-
 
 int main(void) {
     int command = -1;
@@ -119,9 +118,9 @@ int main(void) {
 
         while (input.empty()) getline(cin, input); // for solving user keep inputting '\n' and related stuff
         try {
-            size_t pos = 0;
-            command = stoi(input, &pos);
-            if (pos != input.size()) { // for solving inputs like 1.0, in this case pos will be 1 and input.size will be 3
+            istringstream parser(input);
+            char extra;
+            if (!(parser >> command) || (parser >> extra)) {
                 cout << "\nCommand does not exist!\n";
                 continue;
             }
