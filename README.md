@@ -17,7 +17,7 @@ The program reads student data from a binary (`.bin`) or text (`.txt`) input fil
 ## Build
 
 ```bash
-g++ -std=c++17 -o DS2HW3 DS2HW3_11327146_11327155.cpp
+g++ -std=c++23 -o DS2HW3 DS2HW3_11327146_11327155.cpp
 ```
 
 ## Usage
