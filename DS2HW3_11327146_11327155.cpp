@@ -7,6 +7,7 @@
 #include <sstream>
 #include <algorithm>
 #include <iterator>
+#include <cstring>
 
 using namespace std;
 
@@ -73,31 +74,76 @@ public:
 
 class IO {
   public:
-    bool static readBin(string fileNum, vector<StudentData> data) {
+    bool static readBin(string fileNum, vector<StudentData>& data) {
         // return false if bin don't exsist, then create bin file
         ifstream bin; // binary input
         string binName = "input" + fileNum + ".bin";
-        bin.open(binName);
-        if (bin.is_open()) {
-            // load data to data
-            return true;
-        } else { // no bin file exsist, try to create bin file
+        ifstream binIn(binName, ios::in | ios::binary);
+        if (!bin.is_open()) {
             cout << "\n###" << binName << " does not exist! ###\n";
             return false;
         }
+        StudentData temp;
+        // 3. 循環讀取直到檔案結束
+        // read() 會回傳檔案流狀態，讀不到資料時會自動結束迴圈
+        while (binIn.read(reinterpret_cast<char*>(&temp), sizeof(StudentData))) {
+            data.push_back(temp);
+        }
+        return true;
     }
 
-    bool static TxtToBin(string fileNum, vector<StudentData> data) {
+    bool static TxtToBin(string fileNum, vector<StudentData>& data) {
         ifstream tin; // text input
         string tinName = "input" + fileNum + ".txt";
         tin.open(tinName);
-        if (tin.is_open()) {
-            // load data to data
-            return true;
-        } else { // no bin file exsist, try to create bin file
+        if (!tin.is_open()) {
+            // no file exsist
             cout << "\n###" << tinName << " does not exist! ###\n";
             return false;
         }
+
+        // create a binary file, 
+        string binName = "input" + fileNum + ".bin";
+        ofstream outFile(binName, ios::out | ios::binary); // out means this file is for writing, binary means use binary mode to address this file
+        if (!outFile) {
+            cerr << "無法開啟檔案進行寫入！" << endl;
+            return false;
+        }
+        // transform .txt to .bin
+        string line;
+        // 使用 getline 逐行讀取文字檔
+        while (getline(tin, line)) {
+            if (line.empty()) continue;
+
+            StudentData student;
+            // 初始化結構，避免殘留髒資料
+            memset(&student, 0, sizeof(StudentData));
+
+            stringstream ss(line);
+            string tempID, tempName, part;
+
+            // 1. 讀取學號與姓名
+            ss >> tempID;
+            ss >> tempName;
+            
+            // 複製到結構中的 char 陣列，確保不會溢位
+            strncpy(student.id, tempID.c_str(), sizeof(student.id) - 1);
+            strncpy(student.sname, tempName.c_str(), sizeof(student.sname) - 1);
+
+            unsigned int tempScore;
+            for (int i = 0; i < 6; ++i) {
+                if (ss >> tempScore) {
+                    student.score[i] = (unsigned char)tempScore;
+                }
+            }
+
+            ss >> student.average;
+            outFile.write(reinterpret_cast<const char*>(&student), sizeof(StudentData));
+            data.push_back(student);
+        }
+
+        readBin(fileNum, data);
+        return true;
     }
 };
 
@@ -107,16 +153,14 @@ int main(void) {
     vector<StudentData> data;
     while (true) {
         cout << endl << "* Data Structures and Algorithms *";
-        cout << endl << "*** Heap Construction and Use ****";
+        cout << endl << "************ Hash Table **********";
         cout << endl << "* 0. QUIT                        *";
-        cout << endl << "* 1. Build a max heap            *";
-        cout << endl << "* 2. Build a DEAP                *";
-        cout << endl << "* 3. Build a min-max heap        *";
-        cout << endl << "* 4: Top-K max from min-max heap *";
+        cout << endl << "* 1. Quadratic probing           *";
+        cout << endl << "* 2. Double hashing              *";
         cout << endl << "**********************************";
-        cout << endl << "Input a choice(0, 1, 2, 3, 4): ";
+        cout << endl << "Input a choice(0, 1, 2): ";
+        
         string input;
-
         while (input.empty()) getline(cin, input); // for solving user keep inputting '\n' and related stuff
         try {
             size_t pos = 0;
@@ -135,16 +179,13 @@ int main(void) {
         switch (command) {
             case 1: {
                 data.clear();
-                    string fileNum;
-                    while (true) {
-                        cout << "\nInput a file number ([0] Quit): ";
-                        if (!(cin >> fileNum) || fileNum == "0") return false;
-                        // try to read bin, no then try to create bin
-                        if (IO::readBin(fileNum, data) || IO::TxtToBin(fileNum, data)) {
-                            break;
-                        }
-                    }
-                    // TODO: do quadratic prob, output file
+                string fileNum;
+                cout << "\nInput a file number ([0] Quit): ";
+                if (!(cin >> fileNum) || fileNum == "0") break;
+                // try to read bin, no then try to create bin
+                if (IO::readBin(fileNum, data) || IO::TxtToBin(fileNum, data)) {
+                    // do quadratic probe
+                }
                 break;
             }
             case 2: {
