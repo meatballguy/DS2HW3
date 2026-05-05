@@ -50,6 +50,9 @@ input<N>.txt / input<N>.bin    # Input data files (not committed)
 ## Recent Commits
 
 <!-- COMMITS_START -->
+- `f546bd4` Merge pull request #8 from meatballguy/copilot/update-readme-with-new-features (HUANG YU CHIEN, 2026-05-05)
+- `d5965d2` docs: update README to reflect current menu and features (copilot-swe-agent[bot], 2026-05-05)
+- `ec4d180` docs: update README with recent commits [skip ci] (github-actions[bot], 2026-05-05)
 - `92e5f67` Merge pull request #7 from meatballguy/kitakaaki (HUANG YU CHIEN, 2026-05-05)
 - `23c4c66` 5/5 20:49 update (kitakaaki, 2026-05-05)
 - `28c33ae` docs: update README with recent commits [skip ci] (github-actions[bot], 2026-05-05)
@@ -66,7 +69,4 @@ input<N>.txt / input<N>.bin    # Input data files (not committed)
 - `0790727` Merge pull request #3 from meatballguy/master (HUANG YU CHIEN, 2026-05-05)
 - `f8556bf` Merge branch 'main' into master (HUANG YU CHIEN, 2026-05-05)
 - `985610e` Update C++ standard from C++17 to C++23 (HUANG YU CHIEN, 2026-05-04)
-- `eebe5f8` semi completed mission zero, need to rework AI trace (meatballpasta, 2026-05-04)
-- `33eaa7d` docs: update recent commits in README [skip ci] (github-actions[bot], 2026-05-03)
-- `6f1582e` Merge pull request #2 from meatballguy/kitakaaki (HUANG YU CHIEN, 2026-05-03)
-- `af76ff8` 5/3 22:20 update (kitakaaki, 2026-05-03)- `1f47601` Add README.md and GitHub Actions workflow to auto-update commits section (copilot-swe-agent[bot], 2026-05-03)- `9fddffa` initial commit (meatballpasta, 2026-05-02)<!-- COMMITS_END -->
+- `eebe5f8` semi completed mission zero, need to rework AI trace (meatballpasta, 2026-05-04)- `af76ff8` 5/3 22:20 update (kitakaaki, 2026-05-03)- `1f47601` Add README.md and GitHub Actions workflow to auto-update commits section (copilot-swe-agent[bot], 2026-05-03)- `9fddffa` initial commit (meatballpasta, 2026-05-02)<!-- COMMITS_END -->
