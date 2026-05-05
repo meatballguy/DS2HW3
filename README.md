@@ -1,7 +1,5 @@
 # DS2HW3 — Hash Table Implementation
 
-**Students:** 11327146 莊立聖 · 11327155 黃宇謙
-
 ## Description
 
 This project implements a **Hash Table** in C++ that stores student records (`StudentData`).  
