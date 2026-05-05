@@ -38,7 +38,13 @@ private:
         // --- 私有輔助函式 ---
         
         // 基礎雜湊函數 (將學號字串轉為索引)
-        int primaryHash(string key) const;
+        int primaryHash(char key[MAX_ID_SIZE]) {
+            unsigned long long hashValue = 1;
+            for (int i = 0; i < MAX_ID_SIZE && key[i] != '\0'; i++) {
+                hashValue = (hashValue * key[i]) % tableSize;
+            }
+            return hashValue;
+        };
 
         // 二次雜湊函數 (Double Hashing 專用)
         int secondaryHash(int key) const;
@@ -48,13 +54,20 @@ private:
 
 public:
         // 建構子：根據資料量計算適合的 Table Size (通常取資料量 1.5~2 倍後的質數)
-        HashTable(int dataSize);
+        HashTable(int dataSize) {
+            this->tableSize  = dataSize;
+        };
 
         // --- 核心功能 ---
 
         // 方法一：二次探測法 (Quadratic Probing)
         // 邏輯：pos = (hash + i^2) % tableSize
-        bool insertQuadratic(const StudentData& s);
+        bool insertQuadratic(StudentData& s) {
+            int pos = primaryHash(s.id);
+            while (true) {
+
+            }
+        }
 
         // 方法二：雙重雜湊法 (Double Hashing)
         // 邏輯：pos = (hash1 + i * hash2) % tableSize
@@ -159,44 +172,65 @@ class System {
         string txtName = "input" + fileNum + ".txt";
         return ifstream(txtName).good();
     }
+
+    bool static getCommand(int& cmd) {
+        string input;
+        while (input.empty()) getline(cin, input); // for solving user keep inputting '\n' and related stuff
+        try {
+            size_t pos = 0;
+            cmd = stoi(input, &pos);
+            if (pos != input.size()) { // for solving inputs like 1.0, in this case pos will be 1 and input.size will be 3
+                cout << "\nCommand does not exist!\n";
+                return false;
+            }
+            if (cmd < 0 || cmd > 2)
+                throw out_of_range("invalid");
+        } catch (...) {
+            cout << endl << "Command does not exist!" << endl;
+            return false;
+        }
+        return true;
+    }
 };
 
 int main() {
     vector<StudentData> data;
-    HashTable hashTable(0);
+    // HashTable hashTable(0);
     while (true) {
         System::displayMissionList();
-        string command;
-        cin >> command;
-        if (command == "0") {
-            break;
-        }
-        if (command == "1") {
-            data.clear();
-            string fileNum;
-            cout << "\nInput a file number ([0] Quit): ";
-            cin >> fileNum;
-            if (!System::binaryFileExist(fileNum)) {
-                cout << "### input" << fileNum << ".bin does not exist! ###\n\n";
-                if (!System::textFileExist(fileNum)) {
-                    cout << "### input" << fileNum << ".txt does not exist! ###\n\n";
-                    break;
+        int command;
+        if(!System::getCommand(command)) continue;
+        if (command == 0) break;
+        switch (command) {
+            case 1: {
+                data.clear();
+                string fileNum;
+                cout << "\nInput a file number ([0] Quit): ";
+                cin >> fileNum;
+                if (fileNum == "0") break;
+                if (!System::binaryFileExist(fileNum)) {
+                    cout << "### input" << fileNum << ".bin does not exist! ###\n\n";
+                    if (!System::textFileExist(fileNum)) {
+                        cout << "### input" << fileNum << ".txt does not exist! ###\n\n";
+                        break;
+                    }
+                    System::txtToBin(fileNum, data);          
                 }
-                System::txtToBin(fileNum, data);          
-            }
-            System::readBin(fileNum, data);
-            // todo: do quadratic probing
-            break;
-        }
-        if (command == "2") {
-            if (data.empty()) {
-                cout << "### Command 1 first. ###\n\n\n";
+                System::readBin(fileNum, data);
+                // todo: do quadratic probing
                 break;
             }
-            // do double hashing
-        } else {
-            cout << endl << "Command does not exist!\n\n" << endl;
+
+            case 2: {
+                if (data.empty()) {
+                    cout << "### Command 1 first. ###\n\n\n";
+                    break;
+                } else {
+                    cout << endl << "Command does not exist!\n\n" << endl;
+                }
+                // do double hashing
+            }
         }
-    } 
+    }
     return 0;
 }
