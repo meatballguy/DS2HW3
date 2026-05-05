@@ -42,4 +42,22 @@ input<N>.txt / input<N>.bin    # Input data files (not committed)
 ## Recent Commits
 
 <!-- COMMITS_START -->
-<!-- COMMITS_END -->
+- `b24f641` Refactor README update workflow for recent commits (HUANG YU CHIEN, 2026-05-05)
+- `92b047d` Update README to remove student names (HUANG YU CHIEN, 2026-05-05)
+- `3ab4c09` Merge pull request #5 from meatballguy/copilot/modify-readme-new-commit (HUANG YU CHIEN, 2026-05-05)
+- `f831bac` Add GitHub Actions workflow to auto-update README with recent commits (copilot-swe-agent[bot], 2026-05-05)
+- `a15545c` Delete .github/workflows directory (HUANG YU CHIEN, 2026-05-05)
+- `23e9c5a` Merge pull request #4 from meatballguy/kitakaaki (HUANG YU CHIEN, 2026-05-05)
+- `cbb643d` 5/5 12:18 update (kitakaaki, 2026-05-05)
+- `0790727` Merge pull request #3 from meatballguy/master (HUANG YU CHIEN, 2026-05-05)
+- `f8556bf` Merge branch 'main' into master (HUANG YU CHIEN, 2026-05-05)
+- `985610e` Update C++ standard from C++17 to C++23 (HUANG YU CHIEN, 2026-05-04)
+- `eebe5f8` semi completed mission zero, need to rework AI trace (meatballpasta, 2026-05-04)
+- `33eaa7d` docs: update recent commits in README [skip ci] (github-actions[bot], 2026-05-03)
+- `6f1582e` Merge pull request #2 from meatballguy/kitakaaki (HUANG YU CHIEN, 2026-05-03)
+- `af76ff8` 5/3 22:20 update (kitakaaki, 2026-05-03)
+- `2893f21` docs: update recent commits in README [skip ci] (github-actions[bot], 2026-05-03)
+- `44fabc6` Merge pull request #1 from meatballguy/copilot/modify-readme-new-commit (HUANG YU CHIEN, 2026-05-03)
+- `1f47601` Add README.md and GitHub Actions workflow to auto-update commits section (copilot-swe-agent[bot], 2026-05-03)
+- `368235f` 完成 HashTable 模板與 IO 邏輯更新 (meatballpasta, 2026-05-02)
+- `9fddffa` initial commit (meatballpasta, 2026-05-02)<!-- COMMITS_END -->
