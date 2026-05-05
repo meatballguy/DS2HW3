@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <iterator>
 #include <cstring>
+#include <iomanip>
 #define MAX_ID_SIZE 10
 #define MAX_NAME_SIZE 10
 #define SCORE_COUNT 6
@@ -22,70 +23,222 @@ struct StudentData {
 };
 
 class HashTable {
-private:
-        // 定義儲存槽狀態，處理 Quadratic Probing 必備
+    private:
         enum SlotState { EMPTY, OCCUPIED, DELETED };
 
         struct HashEntry {
-            StudentData data;
             SlotState state = EMPTY;
+            int hvalue;
+            char id[MAX_ID_SIZE];
+            char sname[MAX_NAME_SIZE];
+            float averageScore;
         };
 
         vector<HashEntry> table;
         int tableSize;
         int totalItems;
+        int dataSize;
 
-        // --- 私有輔助函式 ---
-        
-        // 基礎雜湊函數 (將學號字串轉為索引)
-        int primaryHash(char key[MAX_ID_SIZE]) {
-            unsigned long long hashValue = 1;
-            for (int i = 0; i < MAX_ID_SIZE && key[i] != '\0'; i++) {
-                hashValue = (hashValue * key[i]) % tableSize;
+        int idToKey(char id[MAX_ID_SIZE]) {
+            unsigned long long key = 1;
+            for (int i = 0; i < MAX_ID_SIZE && id[i] != '\0'; i++) {
+                key *= (unsigned char)id[i];
             }
-            return hashValue;
-        };
+            return key % tableSize;
+        }
 
-        // 二次雜湊函數 (Double Hashing 專用)
-        int secondaryHash(int key) const;
+        int primaryHash(int key) {
+            return key % tableSize;
+        }
 
-        // 尋找下一個質數 (用於設定 tableSize)
-        int nextPrime(int n) const;
+        int secondaryHash(int hashValue, int dataSize) { 
+            int step = nextPrime(dataSize / 5);
+            return step - (hashValue % step);
+        }
 
-public:
-        // 建構子：根據資料量計算適合的 Table Size (通常取資料量 1.5~2 倍後的質數)
-        HashTable(int dataSize) {
-            this->tableSize  = dataSize;
-        };
-
-        // --- 核心功能 ---
-
-        // 方法一：二次探測法 (Quadratic Probing)
-        // 邏輯：pos = (hash + i^2) % tableSize
-        bool insertQuadratic(StudentData& s) {
-            int pos = primaryHash(s.id);
+        int nextPrime(int n) {
             while (true) {
-
+                n++;
+                bool isPrime = true;
+                for (int i = 2; i * i <= n; i++) {
+                    if (n % i == 0) {
+                        isPrime = false;
+                        break;
+                    }
+                }
+                if (isPrime) return n;
             }
         }
 
-        // 方法二：雙重雜湊法 (Double Hashing)
-        // 邏輯：pos = (hash1 + i * hash2) % tableSize
-        bool insertDouble(const StudentData& s);
+    public:
+        HashTable(int dataSize) {
+            this->tableSize  = nextPrime(dataSize * 1.15);
+            this->dataSize = dataSize;
+            table.resize(tableSize);
+            totalItems = 0;
+        }
 
-        // 搜尋功能
-        int search(string id) const;
+        bool insertQuadratic(StudentData& s) {
+            int key = idToKey(s.id);
+            int pos = primaryHash(key);
+            int factor = 1;
+            int count = 0;
+            while (count < tableSize) {
+                if (table[pos].state == EMPTY || table[pos].state == DELETED) {
+                    table[pos].hvalue = key;
+                    strncpy(table[pos].id, s.id, MAX_ID_SIZE);
+                    strncpy(table[pos].sname, s.sname, MAX_NAME_SIZE);
+                    table[pos].averageScore = s.average;
+                    table[pos].state = OCCUPIED;
+                    totalItems++;
+                    return true;
+                } else if (table[pos].state == OCCUPIED && strcmp(table[pos].id, s.id) == 0) {
+                    return true;
+                }
+                pos = (pos + factor * factor) % tableSize;
+                factor++;
+                count++;
+            }
+            return false;
+        }
 
-        // --- 工具功能 ---
+        bool insertDouble(StudentData& s) {
+            int key = idToKey(s.id);
+            int pos = primaryHash(key);
+            int hash2 = secondaryHash(key, dataSize);
+            int stepCount = 0;
+            int count = 0;
+            while (count < tableSize) {
+                if (table[pos].state == EMPTY || table[pos].state == DELETED) {
+                    table[pos].hvalue = key;
+                    strncpy(table[pos].id, s.id, MAX_ID_SIZE);
+                    strncpy(table[pos].sname, s.sname, MAX_NAME_SIZE);
+                    table[pos].averageScore = s.average;
+                    table[pos].state = OCCUPIED;
+                    totalItems++;
+                    return true;
+                } else if (table[pos].state == OCCUPIED && strcmp(table[pos].id, s.id) == 0) {
+                    return true;
+                }
+                stepCount++;
+                pos = (pos + stepCount * hash2) % tableSize;
+                count++;
+            }
+            return false;
+        }
 
-        // 計算目前的成功/失敗平均探測次數 (作業通常會要求輸出)
-        void getStats() const;
+        int quadraticProbeCount(char id[MAX_ID_SIZE]) {
+            int key = idToKey(id);
+            int pos = primaryHash(key);
+            int factor = 1;
+            int count = 1;
+            while (count <= tableSize) {
+                if (table[pos].state == EMPTY) {
+                    return count;
+                } else if (table[pos].state == OCCUPIED && strcmp(table[pos].id, id) == 0) {
+                    return count;
+                }
+                pos = (pos + factor * factor) % tableSize;
+                factor++;
+                count++;
+            }
+            return count;
+        }
 
-        // 清空 Table 以供下一個指令重新使用
-        void clear();
+        int doubleHashProbeCount(char id[MAX_ID_SIZE]) {
+            int key = idToKey(id);
+            int pos = primaryHash(key);
+            int hash2 = secondaryHash(key, dataSize);
+            int stepCount = 1;
+            int count = 1;
+            while (count <= tableSize) {
+                if (table[pos].state == EMPTY) {
+                    return count;
+                } else if (table[pos].state == OCCUPIED && strcmp(table[pos].id, id) == 0) {
+                    return count;
+                }
+                pos = (pos + stepCount * hash2) % tableSize;
+                stepCount++;
+                count++;
+            }
+            return count;
+        }
 
-        // 解構子
-        ~HashTable();
+        pair<double, double> getQuadraticProbeStats() {
+            double successSearchCount = 0;
+            double unsuccessSearchCount = 0;
+            for (auto& entry : table) {
+                if (entry.state == OCCUPIED) {
+                    successSearchCount += quadraticProbeCount(entry.id);
+                }
+            }
+            
+            for (int i = 0; i < tableSize; i++) {
+                int pos = i;
+                int factor = 1;
+                int count = 1;
+                while (count <= tableSize && table[pos].state != EMPTY) {
+                    pos = (pos + factor * factor) % tableSize;
+                    factor++;
+                    count++;
+                }
+                unsuccessSearchCount += count;
+            }
+            return make_pair(successSearchCount / totalItems, unsuccessSearchCount / tableSize);
+        }
+
+        double getDoubleHashProbeStats() {
+            double successSearchCount = 0;
+            for (auto& entry : table) {
+                if (entry.state == OCCUPIED) {
+                    successSearchCount += doubleHashProbeCount(entry.id);
+                }
+            }
+            return successSearchCount / totalItems;
+        }
+
+        void clear() {
+            table.clear();
+            totalItems = 0;
+        }
+
+        ~HashTable() {
+            table.clear();
+        }
+
+        void createQuadraticHashFile(string fileNum) {
+            string fileName = "quadratic" + fileNum + ".txt";
+            ofstream out(fileName);
+            out << " --- Hash table created by Quadratic probing ---\n";
+            for (int i = 0; i < tableSize; i++) {
+                out << "[" << setw(3) << i << "] ";
+                if (table[i].state == OCCUPIED) {
+                    out << setw(10) << table[i].hvalue << ", "
+                        << setw(10) << table[i].id << ", "
+                        << setw(10) << table[i].sname << ", "
+                        << setw(10) << fixed << setprecision(2) << table[i].averageScore;
+                }
+                out << "\n";
+            }
+            out.close();
+        }
+
+        void createDoubleHashFile(string fileNum) {
+            string fileName = "double" + fileNum + ".txt";
+            ofstream out(fileName);
+            out << " --- Hash table created by Double hashing ---\n";
+            for (int i = 0; i < tableSize; i++) {
+                out << "[" << setw(3) << i << "] ";
+                if (table[i].state == OCCUPIED) {
+                    out << setw(10) << table[i].hvalue << ", "
+                        << setw(10) << table[i].id << ", "
+                        << setw(10) << table[i].sname << ", "
+                        << setw(10) << fixed << setprecision(2) << table[i].averageScore;
+                }
+                out << "\n";
+            }
+            out.close();
+        }
 };
 
 class System {
@@ -97,8 +250,6 @@ class System {
         }
         ifstream binIn(binName, ios::in | ios::binary);
         StudentData temp;
-        // 3. 循環讀取直到檔案結束
-        // read() 會回傳檔案流狀態，讀不到資料時會自動結束迴圈
         while (binIn.read(reinterpret_cast<char*>(&temp), sizeof(StudentData))) {
             data.push_back(temp);
         }
@@ -113,27 +264,19 @@ class System {
         string binName = "input" + fileNum + ".bin";
         ofstream outFile(binName, ios::out | ios::binary);
         
-        if (!outFile) {
-            cerr << "Unable to open file for writing: " << binName << endl;
-            return;
-        }
-        
         string line;
         while (getline(tin, line)) {
             if (line.empty()) continue;
 
             StudentData student;
-            // 初始化結構，避免殘留髒資料
             memset(&student, 0, sizeof(StudentData));
 
             stringstream ss(line);
             string tempID, tempName;
 
-            // 1. 讀取學號與姓名
             ss >> tempID;
             ss >> tempName;
             
-            // 複製到結構中的 char 陣列，確保不會溢位
             strncpy(student.id, tempID.c_str(), sizeof(student.id) - 1);
             strncpy(student.sname, tempName.c_str(), sizeof(student.sname) - 1);
 
@@ -145,11 +288,8 @@ class System {
             }
             ss >> student.average;
             
-            // Write the struct to binary file
             outFile.write(reinterpret_cast<const char*>(&student), sizeof(StudentData));
-            data.push_back(student);
         }
-        
         outFile.close();
     }
 
@@ -175,11 +315,11 @@ class System {
 
     bool static getCommand(int& cmd) {
         string input;
-        while (input.empty()) getline(cin, input); // for solving user keep inputting '\n' and related stuff
+        while (input.empty()) getline(cin, input);
         try {
             size_t pos = 0;
             cmd = stoi(input, &pos);
-            if (pos != input.size()) { // for solving inputs like 1.0, in this case pos will be 1 and input.size will be 3
+            if (pos != input.size()) {
                 cout << "\nCommand does not exist!\n";
                 return false;
             }
@@ -195,7 +335,7 @@ class System {
 
 int main() {
     vector<StudentData> data;
-    // HashTable hashTable(0);
+    string currentFileNum = "";
     while (true) {
         System::displayMissionList();
         int command;
@@ -208,8 +348,9 @@ int main() {
                 cout << "\nInput a file number ([0] Quit): ";
                 cin >> fileNum;
                 if (fileNum == "0") break;
+                currentFileNum = fileNum;
                 if (!System::binaryFileExist(fileNum)) {
-                    cout << "### input" << fileNum << ".bin does not exist! ###\n\n";
+                    cout << "### input" << fileNum << ".bin does not exist! ###\n";
                     if (!System::textFileExist(fileNum)) {
                         cout << "### input" << fileNum << ".txt does not exist! ###\n\n";
                         break;
@@ -217,18 +358,35 @@ int main() {
                     System::txtToBin(fileNum, data);          
                 }
                 System::readBin(fileNum, data);
-                // todo: do quadratic probing
+                
+                HashTable ht(data.size());
+                for (auto& st : data) {
+                    ht.insertQuadratic(st);
+                }
+                ht.createQuadraticHashFile(fileNum);
+                auto stats = ht.getQuadraticProbeStats();
+                cout << "Hash table has been successfully created by Quadratic probing\n";
+                cout << "unsuccessful search: " << fixed << setprecision(4) << stats.second << " comparisons on average\n";
+                cout << "successful search: " << fixed << setprecision(4) << stats.first << " comparisons on average\n";
                 break;
             }
 
             case 2: {
                 if (data.empty()) {
-                    cout << "### Command 1 first. ###\n\n\n";
+                    cout << "### Command 1 first. ###\n\n";
                     break;
-                } else {
-                    cout << endl << "Command does not exist!\n\n" << endl;
                 }
-                // do double hashing
+                string fileNum = currentFileNum;
+
+                HashTable ht(data.size());
+                for (auto& st : data) {
+                    ht.insertDouble(st);
+                }
+                ht.createDoubleHashFile(fileNum);
+                double stats = ht.getDoubleHashProbeStats();
+                cout << "Hash table has been successfully created by Double hashing\n";
+                cout << "successful search: " << fixed << setprecision(4) << stats << " comparisons on average\n";
+                break;
             }
         }
     }
