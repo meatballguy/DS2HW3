@@ -8,13 +8,16 @@
 #include <algorithm>
 #include <iterator>
 #include <cstring>
+#define MAX_ID_SIZE 10
+#define MAX_NAME_SIZE 10
+#define SCORE_COUNT 6
 
 using namespace std;
 
 struct StudentData {
-    char id[10];
-    char sname[10];
-    unsigned char score[6];
+    char id[MAX_ID_SIZE];
+    char sname[MAX_NAME_SIZE];
+    unsigned char score[SCORE_COUNT];
     float average;
 };
 
@@ -72,46 +75,37 @@ public:
         ~HashTable();
 };
 
-class IO {
+class System {
   public:
-    bool static readBin(string fileNum, vector<StudentData>& data) {
-        // return false if bin don't exsist, then create bin file
-        ifstream bin; // binary input
+    void static readBin(string fileNum, vector<StudentData>& data) {
         string binName = "input" + fileNum + ".bin";
-        ifstream binIn(binName, ios::in | ios::binary);
-        if (!bin.is_open()) {
-            cout << "\n###" << binName << " does not exist! ###\n";
-            return false;
+        if (!ifstream(binName).good()) {
+            return;
         }
+        ifstream binIn(binName, ios::in | ios::binary);
         StudentData temp;
         // 3. 循環讀取直到檔案結束
         // read() 會回傳檔案流狀態，讀不到資料時會自動結束迴圈
         while (binIn.read(reinterpret_cast<char*>(&temp), sizeof(StudentData))) {
             data.push_back(temp);
         }
-        return true;
     }
 
-    bool static TxtToBin(string fileNum, vector<StudentData>& data) {
-        ifstream tin; // text input
+    void static txtToBin(string fileNum, vector<StudentData>& data) {
         string tinName = "input" + fileNum + ".txt";
-        tin.open(tinName);
-        if (!tin.is_open()) {
-            // no file exsist
-            cout << "\n###" << tinName << " does not exist! ###\n";
-            return false;
+        if (!ifstream(tinName).good()) {
+            return;
         }
-
-        // create a binary file, 
+        ifstream tin(tinName);
         string binName = "input" + fileNum + ".bin";
-        ofstream outFile(binName, ios::out | ios::binary); // out means this file is for writing, binary means use binary mode to address this file
+        ofstream outFile(binName, ios::out | ios::binary);
+        
         if (!outFile) {
-            cerr << "無法開啟檔案進行寫入！" << endl;
-            return false;
+            cerr << "Unable to open file for writing: " << binName << endl;
+            return;
         }
-        // transform .txt to .bin
+        
         string line;
-        // 使用 getline 逐行讀取文字檔
         while (getline(tin, line)) {
             if (line.empty()) continue;
 
@@ -120,7 +114,7 @@ class IO {
             memset(&student, 0, sizeof(StudentData));
 
             stringstream ss(line);
-            string tempID, tempName, part;
+            string tempID, tempName;
 
             // 1. 讀取學號與姓名
             ss >> tempID;
@@ -131,27 +125,22 @@ class IO {
             strncpy(student.sname, tempName.c_str(), sizeof(student.sname) - 1);
 
             unsigned int tempScore;
-            for (int i = 0; i < 6; ++i) {
+            for (int i = 0; i < SCORE_COUNT; ++i) {
                 if (ss >> tempScore) {
                     student.score[i] = (unsigned char)tempScore;
                 }
             }
-
             ss >> student.average;
+            
+            // Write the struct to binary file
             outFile.write(reinterpret_cast<const char*>(&student), sizeof(StudentData));
             data.push_back(student);
         }
-
-        readBin(fileNum, data);
-        return true;
+        
+        outFile.close();
     }
-};
 
-
-int main(void) {
-    int command = -1;
-    vector<StudentData> data;
-    while (true) {
+    void static displayMissionList() {
         cout << endl << "* Data Structures and Algorithms *";
         cout << endl << "************ Hash Table **********";
         cout << endl << "* 0. QUIT                        *";
@@ -159,52 +148,54 @@ int main(void) {
         cout << endl << "* 2. Double hashing              *";
         cout << endl << "**********************************";
         cout << endl << "Input a choice(0, 1, 2): ";
-        
-        string input;
-        while (input.empty()) getline(cin, input); // for solving user keep inputting '\n' and related stuff
-        try {
-            size_t pos = 0;
-            command = stoi(input, &pos);
-            if (pos != input.size()) { // for solving inputs like 1.0, in this case pos will be 1 and input.size will be 3
-                cout << "\nCommand does not exist!\n";
-                continue;
-            }
-            if (command < 0 || command > 2)
-                throw out_of_range("invalid");
-        } catch (...) {
-            cout << endl << "Command does not exist!" << endl;
-            continue;
+    }
+
+    bool static binaryFileExist(string fileNum) {
+        string binName = "input" + fileNum + ".bin";
+        return ifstream(binName).good();
+    }
+
+    bool static textFileExist(string fileNum) {
+        string txtName = "input" + fileNum + ".txt";
+        return ifstream(txtName).good();
+    }
+};
+
+int main() {
+    vector<StudentData> data;
+    HashTable hashTable(0);
+    while (true) {
+        System::displayMissionList();
+        string command;
+        cin >> command;
+        if (command == "0") {
+            break;
         }
-        if (command == 0) break;
-        switch (command) {
-            case 1: {
-                data.clear();
-                string fileNum;
-                cout << "\nInput a file number ([0] Quit): ";
-                if (!(cin >> fileNum) || fileNum == "0") break;
-                // try to read bin, no then try to create bin
-                if (IO::readBin(fileNum, data) || IO::TxtToBin(fileNum, data)) {
-                    // do quadratic probe
+        if (command == "1") {
+            data.clear();
+            string fileNum;
+            cout << "\nInput a file number ([0] Quit): ";
+            cin >> fileNum;
+            if (!System::binaryFileExist(fileNum)) {
+                cout << "### input" << fileNum << ".bin does not exist! ###\n\n";
+                if (!System::textFileExist(fileNum)) {
+                    cout << "### input" << fileNum << ".txt does not exist! ###\n\n";
+                    break;
                 }
+                System::txtToBin(fileNum, data);          
+            }
+            System::readBin(fileNum, data);
+            // todo: do quadratic probing
+            break;
+        }
+        if (command == "2") {
+            if (data.empty()) {
+                cout << "### Command 1 first. ###\n\n\n";
                 break;
             }
-            case 2: {
-                if (data.empty()) {
-                    cout << "\n### Command 1 first. ###\n\n";
-                    break;
-                } else{
-                    // TODO: do double hashing, output file
-                }
-            }
-            case 3: {
-
-            }
-            case 4: {
-
-            }
-            default:
-            cout << endl << "Command does not exist!" << endl;
-            break;
+            // do double hashing
+        } else {
+            cout << endl << "Command does not exist!\n\n" << endl;
         }
     } 
     return 0;
