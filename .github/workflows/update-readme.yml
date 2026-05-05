@@ -19,10 +19,9 @@ jobs:
 
       - name: Update README with recent commits
         run: |
-          COMMITS=$(git log --pretty=format:"- \`%h\` %s (%an, %ad)" --date=short -20)
-          ESCAPED=$(echo "$COMMITS" | sed 's/[&/\]/\\&/g')
+          git log --pretty=format:"- \`%h\` %s (%an, %ad)" --date=short -20 > /tmp/commits.txt
           sed -i '/<!-- COMMITS_START -->/,/<!-- COMMITS_END -->/{/<!-- COMMITS_START -->/!{/<!-- COMMITS_END -->/!d}}' README.md
-          sed -i "s|<!-- COMMITS_START -->|<!-- COMMITS_START -->\n${ESCAPED}|" README.md
+          sed -i '/<!-- COMMITS_START -->/r /tmp/commits.txt' README.md
 
       - name: Commit and push if changed
         run: |
