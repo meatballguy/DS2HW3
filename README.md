@@ -22,15 +22,23 @@ g++ -std=c++23 -o DS2HW3 DS2HW3_11327146_11327155.cpp
 
 ```
 * Data Structures and Algorithms *
-**** Hash Table Operations  ******
+************ Hash Table **********
 * 0. QUIT                        *
-* 1. Load data & Quadratic Probe *
-* 2. Double Hashing              *
-* 3. Search                      *
-* 4. Statistics                  *
+* 1. Quadratic probing           *
+* 2. Double hashing              *
 **********************************
-Input a choice(0, 1, 2, 3, 4):
+Input a choice(0, 1, 2):
 ```
+
+### Menu Options
+
+| Option | Description |
+|---|---|
+| **0. QUIT** | Exit the program |
+| **1. Quadratic probing** | Load data from `input<N>.bin` (or convert from `input<N>.txt`), build the hash table using quadratic probing, write results to `quadratic<N>.txt`, and print average probe counts for successful and unsuccessful searches |
+| **2. Double hashing** | Build a second hash table from the already-loaded data using double hashing, write results to `double<N>.txt`, and print the average probe count for successful searches |
+
+> **Note:** Option 2 requires option 1 to be run first (to load data). Statistics are printed automatically after each build — there is no separate search or statistics menu item.
 
 ## File Structure
 
