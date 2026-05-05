@@ -1,0 +1,33 @@
+name: Update README with Recent Commits
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Update README with recent commits
+        run: |
+          COMMITS=$(git log --pretty=format:"- \`%h\` %s (%an, %ad)" --date=short -20)
+          ESCAPED=$(echo "$COMMITS" | sed 's/[&/\]/\\&/g')
+          sed -i '/<!-- COMMITS_START -->/,/<!-- COMMITS_END -->/{/<!-- COMMITS_START -->/!{/<!-- COMMITS_END -->/!d}}' README.md
+          sed -i "s|<!-- COMMITS_START -->|<!-- COMMITS_START -->\n${ESCAPED}|" README.md
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git diff --cached --quiet || git commit -m "docs: update README with recent commits [skip ci]"
+          git push
