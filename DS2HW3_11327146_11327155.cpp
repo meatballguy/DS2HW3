@@ -220,6 +220,7 @@ class HashTable {
                 }
                 out << "\n";
             }
+            out << " -----------------------------------------------------";
             out.close();
         }
 
@@ -237,6 +238,7 @@ class HashTable {
                 }
                 out << "\n";
             }
+            out << " -----------------------------------------------------";
             out.close();
         }
 };
@@ -350,9 +352,9 @@ int main() {
                 if (fileNum == "0") break;
                 currentFileNum = fileNum;
                 if (!System::binaryFileExist(fileNum)) {
-                    cout << "### input" << fileNum << ".bin does not exist! ###\n";
+                    cout << "\n### input" << fileNum << ".bin does not exist! ###\n";
                     if (!System::textFileExist(fileNum)) {
-                        cout << "### input" << fileNum << ".txt does not exist! ###\n\n";
+                        cout << "\n### input" << fileNum << ".txt does not exist! ###\n\n";
                         break;
                     }
                     System::txtToBin(fileNum, data);          
@@ -365,7 +367,7 @@ int main() {
                 }
                 ht.createQuadraticHashFile(fileNum);
                 auto stats = ht.getQuadraticProbeStats();
-                cout << "Hash table has been successfully created by Quadratic probing\n";
+                cout << "\nHash table has been successfully created by Quadratic probing\n";
                 cout << "unsuccessful search: " << fixed << setprecision(4) << stats.second << " comparisons on average\n";
                 cout << "successful search: " << fixed << setprecision(4) << stats.first << " comparisons on average\n";
                 break;
@@ -384,7 +386,7 @@ int main() {
                 }
                 ht.createDoubleHashFile(fileNum);
                 double stats = ht.getDoubleHashProbeStats();
-                cout << "Hash table has been successfully created by Double hashing\n";
+                cout << "\nHash table has been successfully created by Double hashing\n";
                 cout << "successful search: " << fixed << setprecision(4) << stats << " comparisons on average\n";
                 break;
             }
