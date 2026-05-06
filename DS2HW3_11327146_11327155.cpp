@@ -180,11 +180,11 @@ class HashTable {
                 int factor = 1;
                 int count = 1;
                 while (count <= tableSize && table[pos].state != EMPTY) {
-                    pos = (pos + factor * factor) % tableSize;
+                    pos = (i + factor * factor) % tableSize;
                     factor++;
                     count++;
                 }
-                unsuccessSearchCount += count;
+                unsuccessSearchCount += (count - 1);
             }
             return make_pair(successSearchCount / totalItems, unsuccessSearchCount / tableSize);
         }
