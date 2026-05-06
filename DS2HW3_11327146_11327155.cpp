@@ -39,19 +39,19 @@ class HashTable {
         int totalItems;
         int dataSize;
 
-        int idToKey(char id[MAX_ID_SIZE]) {
+        unsigned long long idToKey(char id[MAX_ID_SIZE]) {
             unsigned long long key = 1;
             for (int i = 0; i < MAX_ID_SIZE && id[i] != '\0'; i++) {
                 key *= (unsigned char)id[i];
             }
+            return key;
+        }
+
+        int primaryHash(unsigned long long key) {
             return key % tableSize;
         }
 
-        int primaryHash(int key) {
-            return key % tableSize;
-        }
-
-        int secondaryHash(int hashValue, int dataSize) { 
+        int secondaryHash(unsigned long long hashValue, int dataSize) { 
             int step = nextPrime(dataSize / 5);
             return step - (hashValue % step);
         }
@@ -79,13 +79,14 @@ class HashTable {
         }
 
         bool insertQuadratic(StudentData& s) {
-            int key = idToKey(s.id);
+            unsigned long long key = idToKey(s.id);
             int pos = primaryHash(key);
+            int primaryPos = pos;
             int factor = 1;
             int count = 0;
             while (count < tableSize) {
                 if (table[pos].state == EMPTY || table[pos].state == DELETED) {
-                    table[pos].hvalue = key;
+                    table[pos].hvalue = primaryHash(key);
                     strncpy(table[pos].id, s.id, MAX_ID_SIZE);
                     strncpy(table[pos].sname, s.sname, MAX_NAME_SIZE);
                     table[pos].averageScore = s.average;
@@ -95,7 +96,7 @@ class HashTable {
                 } else if (table[pos].state == OCCUPIED && strcmp(table[pos].id, s.id) == 0) {
                     return true;
                 }
-                pos = (pos + factor * factor) % tableSize;
+                pos = (primaryPos + factor * factor) % tableSize;
                 factor++;
                 count++;
             }
@@ -103,14 +104,14 @@ class HashTable {
         }
 
         bool insertDouble(StudentData& s) {
-            int key = idToKey(s.id);
+            unsigned long long key = idToKey(s.id);
             int pos = primaryHash(key);
             int hash2 = secondaryHash(key, dataSize);
             int stepCount = 0;
             int count = 0;
             while (count < tableSize) {
                 if (table[pos].state == EMPTY || table[pos].state == DELETED) {
-                    table[pos].hvalue = key;
+                    table[pos].hvalue = primaryHash(key);
                     strncpy(table[pos].id, s.id, MAX_ID_SIZE);
                     strncpy(table[pos].sname, s.sname, MAX_NAME_SIZE);
                     table[pos].averageScore = s.average;
@@ -121,15 +122,16 @@ class HashTable {
                     return true;
                 }
                 stepCount++;
-                pos = (pos + stepCount * hash2) % tableSize;
+                pos = (pos + hash2) % tableSize;
                 count++;
             }
             return false;
         }
 
         int quadraticProbeCount(char id[MAX_ID_SIZE]) {
-            int key = idToKey(id);
+            unsigned long long key = idToKey(id);
             int pos = primaryHash(key);
+            int primaryPos = pos;
             int factor = 1;
             int count = 1;
             while (count <= tableSize) {
@@ -138,7 +140,7 @@ class HashTable {
                 } else if (table[pos].state == OCCUPIED && strcmp(table[pos].id, id) == 0) {
                     return count;
                 }
-                pos = (pos + factor * factor) % tableSize;
+                pos = (primaryPos + factor * factor) % tableSize;
                 factor++;
                 count++;
             }
@@ -146,7 +148,7 @@ class HashTable {
         }
 
         int doubleHashProbeCount(char id[MAX_ID_SIZE]) {
-            int key = idToKey(id);
+            unsigned long long key = idToKey(id);
             int pos = primaryHash(key);
             int hash2 = secondaryHash(key, dataSize);
             int stepCount = 1;
@@ -157,7 +159,7 @@ class HashTable {
                 } else if (table[pos].state == OCCUPIED && strcmp(table[pos].id, id) == 0) {
                     return count;
                 }
-                pos = (pos + stepCount * hash2) % tableSize;
+                pos = (pos + hash2) % tableSize;
                 stepCount++;
                 count++;
             }
@@ -178,11 +180,11 @@ class HashTable {
                 int factor = 1;
                 int count = 1;
                 while (count <= tableSize && table[pos].state != EMPTY) {
-                    pos = (pos + factor * factor) % tableSize;
+                    pos = (i + factor * factor) % tableSize;
                     factor++;
                     count++;
                 }
-                unsuccessSearchCount += count;
+                unsuccessSearchCount += (count - 1);
             }
             return make_pair(successSearchCount / totalItems, unsuccessSearchCount / tableSize);
         }
@@ -216,27 +218,29 @@ class HashTable {
                     out << setw(10) << table[i].hvalue << ", "
                         << setw(10) << table[i].id << ", "
                         << setw(10) << table[i].sname << ", "
-                        << setw(10) << fixed << setprecision(2) << table[i].averageScore;
+                        << setw(10) << defaultfloat << table[i].averageScore;
                 }
                 out << "\n";
             }
+            out << " ----------------------------------------------------- \n";
             out.close();
         }
 
         void createDoubleHashFile(string fileNum) {
             string fileName = "double" + fileNum + ".txt";
             ofstream out(fileName);
-            out << " --- Hash table created by Double hashing ---\n";
+            out << " --- Hash table created by Double hashing    ---\n";
             for (int i = 0; i < tableSize; i++) {
                 out << "[" << setw(3) << i << "] ";
                 if (table[i].state == OCCUPIED) {
                     out << setw(10) << table[i].hvalue << ", "
                         << setw(10) << table[i].id << ", "
                         << setw(10) << table[i].sname << ", "
-                        << setw(10) << fixed << setprecision(2) << table[i].averageScore;
+                        << setw(10) << defaultfloat << table[i].averageScore;
                 }
                 out << "\n";
             }
+            out << " ----------------------------------------------------- \n";
             out.close();
         }
 };
@@ -271,15 +275,18 @@ class System {
             StudentData student;
             memset(&student, 0, sizeof(StudentData));
 
-            stringstream ss(line);
-            string tempID, tempName;
-
-            ss >> tempID;
-            ss >> tempName;
+            size_t tab1 = line.find('\t');
+            if (tab1 == string::npos) continue;
+            string tempID = line.substr(0, tab1);
+            
+            size_t tab2 = line.find('\t', tab1 + 1);
+            if (tab2 == string::npos) continue;
+            string tempName = line.substr(tab1 + 1, tab2 - tab1 - 1);
             
             strncpy(student.id, tempID.c_str(), sizeof(student.id) - 1);
             strncpy(student.sname, tempName.c_str(), sizeof(student.sname) - 1);
 
+            stringstream ss(line.substr(tab2 + 1));
             unsigned int tempScore;
             for (int i = 0; i < SCORE_COUNT; ++i) {
                 if (ss >> tempScore) {
@@ -350,9 +357,9 @@ int main() {
                 if (fileNum == "0") break;
                 currentFileNum = fileNum;
                 if (!System::binaryFileExist(fileNum)) {
-                    cout << "### input" << fileNum << ".bin does not exist! ###\n";
+                    cout << "\n### input" << fileNum << ".bin does not exist! ###\n";
                     if (!System::textFileExist(fileNum)) {
-                        cout << "### input" << fileNum << ".txt does not exist! ###\n\n";
+                        cout << "\n### input" << fileNum << ".txt does not exist! ###\n\n";
                         break;
                     }
                     System::txtToBin(fileNum, data);          
@@ -365,7 +372,7 @@ int main() {
                 }
                 ht.createQuadraticHashFile(fileNum);
                 auto stats = ht.getQuadraticProbeStats();
-                cout << "Hash table has been successfully created by Quadratic probing\n";
+                cout << "\nHash table has been successfully created by Quadratic probing\n";
                 cout << "unsuccessful search: " << fixed << setprecision(4) << stats.second << " comparisons on average\n";
                 cout << "successful search: " << fixed << setprecision(4) << stats.first << " comparisons on average\n";
                 break;
@@ -384,7 +391,7 @@ int main() {
                 }
                 ht.createDoubleHashFile(fileNum);
                 double stats = ht.getDoubleHashProbeStats();
-                cout << "Hash table has been successfully created by Double hashing\n";
+                cout << "\nHash table has been successfully created by Double hashing\n";
                 cout << "successful search: " << fixed << setprecision(4) << stats << " comparisons on average\n";
                 break;
             }
