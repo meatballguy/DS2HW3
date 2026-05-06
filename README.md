@@ -50,6 +50,9 @@ input<N>.txt / input<N>.bin    # Input data files (not committed)
 ## Recent Commits
 
 <!-- COMMITS_START -->
+- `9e8c202` Merge pull request #10 from meatballguy/kitakaaki (HUANG YU CHIEN, 2026-05-06)
+- `9dcfe26` 5/6 14:23 update(pass dc test) (kitakaaki, 2026-05-06)
+- `2acd389` docs: update README with recent commits [skip ci] (github-actions[bot], 2026-05-06)
 - `f170b61` Merge pull request #9 from meatballguy/kitakaaki (HUANG YU CHIEN, 2026-05-06)
 - `1bef7be` 5/6 13:51 update(all terminal output correct) (kitakaaki, 2026-05-06)
 - `aafeeee` 5/6 13:30 update(all output file correct) (kitakaaki, 2026-05-06)
@@ -66,7 +69,4 @@ input<N>.txt / input<N>.bin    # Input data files (not committed)
 - `ed962c8` docs: update README with recent commits [skip ci] (github-actions[bot], 2026-05-05)
 - `b24f641` Refactor README update workflow for recent commits (HUANG YU CHIEN, 2026-05-05)
 - `92b047d` Update README to remove student names (HUANG YU CHIEN, 2026-05-05)
-- `3ab4c09` Merge pull request #5 from meatballguy/copilot/modify-readme-new-commit (HUANG YU CHIEN, 2026-05-05)
-- `f831bac` Add GitHub Actions workflow to auto-update README with recent commits (copilot-swe-agent[bot], 2026-05-05)
-- `a15545c` Delete .github/workflows directory (HUANG YU CHIEN, 2026-05-05)
-- `23e9c5a` Merge pull request #4 from meatballguy/kitakaaki (HUANG YU CHIEN, 2026-05-05)- `eebe5f8` semi completed mission zero, need to rework AI trace (meatballpasta, 2026-05-04)- `af76ff8` 5/3 22:20 update (kitakaaki, 2026-05-03)- `1f47601` Add README.md and GitHub Actions workflow to auto-update commits section (copilot-swe-agent[bot], 2026-05-03)- `9fddffa` initial commit (meatballpasta, 2026-05-02)<!-- COMMITS_END -->
+- `3ab4c09` Merge pull request #5 from meatballguy/copilot/modify-readme-new-commit (HUANG YU CHIEN, 2026-05-05)- `23e9c5a` Merge pull request #4 from meatballguy/kitakaaki (HUANG YU CHIEN, 2026-05-05)- `eebe5f8` semi completed mission zero, need to rework AI trace (meatballpasta, 2026-05-04)- `af76ff8` 5/3 22:20 update (kitakaaki, 2026-05-03)- `1f47601` Add README.md and GitHub Actions workflow to auto-update commits section (copilot-swe-agent[bot], 2026-05-03)- `9fddffa` initial commit (meatballpasta, 2026-05-02)<!-- COMMITS_END -->
