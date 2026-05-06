@@ -324,16 +324,16 @@ class System {
         string input;
         while (input.empty()) getline(cin, input);
         try {
-            size_t pos = 0;
+            size_t pos;
             cmd = stoi(input, &pos);
             if (pos != input.size()) {
-                cout << "\nCommand does not exist!\n";
+                cout << "\nCommand does not exist!\n\n";
                 return false;
             }
             if (cmd < 0 || cmd > 2)
                 throw out_of_range("invalid");
         } catch (...) {
-            cout << endl << "Command does not exist!" << endl;
+            cout << endl << "Command does not exist!\n" << endl;
             return false;
         }
         return true;
@@ -354,7 +354,10 @@ int main() {
                 string fileNum;
                 cout << "\nInput a file number ([0] Quit): ";
                 cin >> fileNum;
-                if (fileNum == "0") break;
+                if (fileNum == "0") {
+                    cout << "\n";
+                    break;
+                }
                 currentFileNum = fileNum;
                 if (!System::binaryFileExist(fileNum)) {
                     cout << "\n### input" << fileNum << ".bin does not exist! ###\n";
@@ -391,7 +394,7 @@ int main() {
                 }
                 ht.createDoubleHashFile(fileNum);
                 double stats = ht.getDoubleHashProbeStats();
-                cout << "\nHash table has been successfully created by Double hashing\n";
+                cout << "\nHash table has been successfully created by Double hashing   \n";
                 cout << "successful search: " << fixed << setprecision(4) << stats << " comparisons on average\n";
                 break;
             }
