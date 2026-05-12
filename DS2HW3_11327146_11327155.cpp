@@ -17,6 +17,7 @@
 using namespace std;
 
 struct StudentData {
+    int index;
     char id[MAX_ID_SIZE];
     char sname[MAX_NAME_SIZE];
     unsigned char score[SCORE_COUNT];
@@ -28,6 +29,7 @@ class HashTable {
         enum SlotState { EMPTY, OCCUPIED, DELETED };
 
         struct HashEntry {
+            int index;
             SlotState state = EMPTY;
             int hvalue;
             char id[MAX_ID_SIZE];
@@ -92,10 +94,12 @@ class HashTable {
                     strncpy(table[pos].sname, s.sname, MAX_NAME_SIZE);
                     table[pos].averageScore = s.average;
                     table[pos].state = OCCUPIED;
+                    table[pos].index = s.index;
                     totalItems++;
                     return true;
-                } else if (table[pos].state == OCCUPIED && strcmp(table[pos].id, s.id) == 0) {
-                    return true;
+                // } else if (table[pos].state == OCCUPIED && strcmp(table[pos].id, s.id) == 0) {
+                //     return true;
+                // 
                 }
                 pos = (primaryPos + factor * factor) % tableSize;
                 factor++;
@@ -117,10 +121,12 @@ class HashTable {
                     strncpy(table[pos].sname, s.sname, MAX_NAME_SIZE);
                     table[pos].averageScore = s.average;
                     table[pos].state = OCCUPIED;
+                    table[pos].index = s.index;
                     totalItems++;
                     return true;
-                } else if (table[pos].state == OCCUPIED && strcmp(table[pos].id, s.id) == 0) {
-                    return true;
+                // } else if (table[pos].state == OCCUPIED && strcmp(table[pos].id, s.id) == 0) {
+                //     return true;
+                // 
                 }
                 stepCount++;
                 pos = (pos + hash2) % tableSize;
@@ -129,7 +135,7 @@ class HashTable {
             return false;
         }
 
-        int quadraticProbeCount(char id[MAX_ID_SIZE]) {
+        int quadraticProbeCount(char id[MAX_ID_SIZE], int index) {
             unsigned long long key = idToKey(id);
             int pos = primaryHash(key);
             int primaryPos = pos;
@@ -138,7 +144,7 @@ class HashTable {
             while (count <= tableSize) {
                 if (table[pos].state == EMPTY) {
                     return count;
-                } else if (table[pos].state == OCCUPIED && strcmp(table[pos].id, id) == 0) {
+                } else if (table[pos].state == OCCUPIED && strcmp(table[pos].id, id) == 0 && table[pos].index == index  ) {
                     return count;
                 }
                 pos = (primaryPos + factor * factor) % tableSize;
@@ -148,7 +154,7 @@ class HashTable {
             return count;
         }
 
-        int doubleHashProbeCount(char id[MAX_ID_SIZE]) {
+        int doubleHashProbeCount(char id[MAX_ID_SIZE], int index) {
             unsigned long long key = idToKey(id);
             int pos = primaryHash(key);
             int hash2 = secondaryHash(key, dataSize);
@@ -157,7 +163,7 @@ class HashTable {
             while (count <= tableSize) {
                 if (table[pos].state == EMPTY) {
                     return count;
-                } else if (table[pos].state == OCCUPIED && strcmp(table[pos].id, id) == 0) {
+                } else if (table[pos].state == OCCUPIED && strcmp(table[pos].id, id) == 0 && table[pos].index == index) {
                     return count;
                 }
                 pos = (pos + hash2) % tableSize;
@@ -216,7 +222,7 @@ class HashTable {
             double unsuccessSearchCount = 0;
             for (auto& entry : table) {
                 if (entry.state == OCCUPIED) {
-                    successSearchCount += quadraticProbeCount(entry.id);
+                    successSearchCount += quadraticProbeCount(entry.id, entry.index);
                 }
             }
             
@@ -238,7 +244,7 @@ class HashTable {
             double successSearchCount = 0;
             for (auto& entry : table) {
                 if (entry.state == OCCUPIED) {
-                    successSearchCount += doubleHashProbeCount(entry.id);
+                    successSearchCount += doubleHashProbeCount(entry.id, entry.index);
                 }
             }
             return successSearchCount / totalItems;
@@ -416,8 +422,13 @@ int main() {
                 System::readBin(fileNum, data);
                 
                 HashTable ht(data.size());
+                int index = 0;
                 for (auto& st : data) {
-                    ht.insertQuadratic(st);
+                    st.index = index;
+                    bool inserted = ht.insertQuadratic(st);
+                    if (!inserted)
+                        cout << "### Failed at [" << index << "]. ###\n";
+                    index++;
                 }
                 ht.createQuadraticHashFile(fileNum);
                 auto stats = ht.getQuadraticProbeStats();
@@ -435,7 +446,7 @@ int main() {
                     auto result = ht.quadraticProbe(&searchID[0]);
                     int comparisons = result.first;
                     if (comparisons < 0) {
-                        cout << searchID << " is not found after " << comparisons * -1 << " probes.\n\n";
+                        cout << "\n" << searchID << " is not found after " << comparisons * -1 << " probes.\n\n";
                     } else {
                         cout << "\n{ " 
                              << get<0>(result.second[searchID]) << ", " 
@@ -473,7 +484,7 @@ int main() {
                     auto result = ht.doubleHashProbe(&searchID[0]);
                     int comparisons = result.first;
                     if (comparisons < 0) {
-                        cout << searchID << " is not found after " << comparisons * -1 << " probes.\n\n";
+                        cout << "\n" << searchID << " is not found after " << comparisons * -1 << " probes.\n\n";
                     } else {
                         cout << "\n{ " 
                              << get<0>(result.second[searchID]) << ", " 
