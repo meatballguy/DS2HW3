@@ -9,6 +9,7 @@
 #include <iterator>
 #include <cstring>
 #include <iomanip>
+#include <map>
 #define MAX_ID_SIZE 10
 #define MAX_NAME_SIZE 10
 #define SCORE_COUNT 6
@@ -166,6 +167,50 @@ class HashTable {
             return count;
         }
 
+        pair<int, map<string, tuple<string, string, float>>> quadraticProbe(char id[MAX_ID_SIZE]) {
+            // return a map with {id, name, average} if found, otherwise return an empty map. The int value is the number of probes (negative if not found).
+            map<string, tuple<string, string, float>> result;
+            unsigned long long key = idToKey(id);
+            int pos = primaryHash(key);
+            int primaryPos = pos;
+            int factor = 1;
+            int count = 1;
+            while (count <= tableSize) {
+                if (table[pos].state == EMPTY) {
+                    return make_pair(-count, result);
+                } else if (table[pos].state == OCCUPIED && strcmp(table[pos].id, id) == 0) {
+                    result[string(table[pos].id)] = make_tuple(string(table[pos].id), string(table[pos].sname), table[pos].averageScore);
+                    return make_pair(count, result);
+                }
+                pos = (primaryPos + factor * factor) % tableSize;
+                factor++;
+                count++;
+            }
+            return make_pair(-count, result);
+        }
+
+        pair<int, map<string, tuple<string, string, float>>> doubleHashProbe(char id[MAX_ID_SIZE]) {
+            map<string, tuple<string, string, float>> result;
+            unsigned long long key = idToKey(id);
+            int pos = primaryHash(key);
+            int hash2 = secondaryHash(key, dataSize);
+            int stepCount = 1;
+            int count = 1;
+            while (count <= tableSize) {
+                if (table[pos].state == EMPTY) {
+                    return make_pair(-count, result);
+                } else if (table[pos].state == OCCUPIED && strcmp(table[pos].id, id) == 0) {
+                    result[string(table[pos].id)] = make_tuple(string(table[pos].id), string(table[pos].sname), table[pos].averageScore);
+                    return make_pair(count, result);
+                }
+                pos = (pos + hash2) % tableSize;
+                stepCount++;
+                count++;
+            }
+            return make_pair(-count, result);
+
+        }
+
         pair<double, double> getQuadraticProbeStats() {
             double successSearchCount = 0;
             double unsuccessSearchCount = 0;
@@ -243,6 +288,7 @@ class HashTable {
             out << " ----------------------------------------------------- \n";
             out.close();
         }
+
 };
 
 class System {
@@ -378,6 +424,26 @@ int main() {
                 cout << "\nHash table has been successfully created by Quadratic probing\n";
                 cout << "unsuccessful search: " << fixed << setprecision(4) << stats.second << " comparisons on average\n";
                 cout << "successful search: " << fixed << setprecision(4) << stats.first << " comparisons on average\n";
+                while (true) {
+                    cout << "Input a student ID to search ([0] Quit): ";
+                    string searchID;
+                    cin >> searchID;
+                    if (searchID == "0") {
+                        cout << "\n";
+                        break;
+                    }
+                    auto result = ht.quadraticProbe(&searchID[0]);
+                    int comparisons = result.first;
+                    if (comparisons < 0) {
+                        cout << "\nStudent ID " << searchID << " is not found after " << comparisons * -1 << " probes.\n\n";
+                    } else {
+                        cout << "\n{ " 
+                             << get<0>(result.second[searchID]) << ", " 
+                             << get<1>(result.second[searchID]) << ", " 
+                             << defaultfloat << get<2>(result.second[searchID]) << " } is found after " 
+                             << comparisons << " probes.\n\n";
+                    }
+                }
                 break;
             }
 
@@ -396,6 +462,26 @@ int main() {
                 double stats = ht.getDoubleHashProbeStats();
                 cout << "\nHash table has been successfully created by Double hashing   \n";
                 cout << "successful search: " << fixed << setprecision(4) << stats << " comparisons on average\n";
+                while (true) {
+                    cout << "Input a student ID to search ([0] Quit): ";
+                    string searchID;
+                    cin >> searchID;
+                    if (searchID == "0") {
+                        cout << "\n";
+                        break;
+                    }
+                    auto result = ht.doubleHashProbe(&searchID[0]);
+                    int comparisons = result.first;
+                    if (comparisons < 0) {
+                        cout << "\nStudent ID " << searchID << " is not found after " << comparisons * -1 << " probes.\n\n";
+                    } else {
+                        cout << "\n{ " 
+                             << get<0>(result.second[searchID]) << ", " 
+                             << get<1>(result.second[searchID]) << ", " 
+                             << defaultfloat << get<2>(result.second[searchID]) << " } is found after " 
+                             << comparisons << " probes.\n\n";
+                    }
+                }
                 break;
             }
         }
