@@ -435,7 +435,7 @@ int main() {
                     auto result = ht.quadraticProbe(&searchID[0]);
                     int comparisons = result.first;
                     if (comparisons < 0) {
-                        cout << "\nStudent ID " << searchID << " is not found after " << comparisons * -1 << " probes.\n\n";
+                        cout << searchID << " is not found after " << comparisons * -1 << " probes.\n\n";
                     } else {
                         cout << "\n{ " 
                              << get<0>(result.second[searchID]) << ", " 
@@ -473,7 +473,7 @@ int main() {
                     auto result = ht.doubleHashProbe(&searchID[0]);
                     int comparisons = result.first;
                     if (comparisons < 0) {
-                        cout << "\nStudent ID " << searchID << " is not found after " << comparisons * -1 << " probes.\n\n";
+                        cout << searchID << " is not found after " << comparisons * -1 << " probes.\n\n";
                     } else {
                         cout << "\n{ " 
                              << get<0>(result.second[searchID]) << ", " 
